@@ -6,6 +6,7 @@ class EuclideanDistTracker:
         # Store the center positions of the objects
         # словарь номер машины : координаты её центра
         self.center_points = {}
+        self.coords_ID = []
         # Keep the count of the IDs
         # each time a new object id detected, the count will increase by one
         self.id_count = 0
@@ -30,13 +31,15 @@ class EuclideanDistTracker:
             for id, pt in self.center_points.items():
                 # сравнивается расстояние от центра координат до:
                 # 1. вычисленных координат центра прямоугольника
-                # 2. координат центров прошлых прямоугольников
+                # 2. координат центров прошлого прямоугольника
                 dist = math.hypot(cx - pt[0], cy - pt[1])
-                # если сравнение точек дало < 50
+                # если сравнение точек дало < 100
                 # значит объект тот же самый
-                if dist < 50:
+                if dist < 500:
                     # перезаписываем в словаре значение для данного прямоугольника
                     self.center_points[id] = (cx, cy)
+                    temp = [id, (cx, cy)]
+                    self.coords_ID.append(temp)
                     # вывод номера объекта + координаты
                     print(self.center_points)
                     # self.center_points_last[self.id_count].append(self.center_points.items())
@@ -63,6 +66,9 @@ class EuclideanDistTracker:
 
         # Update dictionary with IDs not used removed
         self.center_points = new_center_points.copy()
+        # if len(self.center_points) != 0:
+        #     self.coords_ID.append(self.center_points.keys())
+        #     self.coords_ID.append(self.center_points.items())
         return objects_bbs_ids
 
 
