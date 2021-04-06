@@ -21,7 +21,7 @@ def get_output_layers(net):
 
 
 may_classes = {1, 2, 3, 5, 7}
-with open('../yolov3.txt', 'r') as f:
+with open('../yoloModel/yolov3.txt', 'r') as f:
     classes = [line.strip() for line in f.readlines()]
 COLORS = np.random.uniform(0, 255, size=(len(classes), 3))
 types_on_image = []
@@ -36,7 +36,7 @@ def classify(image):
 
     # считываются файлы весов и конфигурации, создается сеть
     # на основе обученной модели yolo3
-    net = cv2.dnn.readNet('../yolov3.weights', '../yolov3.cfg')
+    net = cv2.dnn.readNet('../yoloModel/yolov3.weights', '../yoloModel/yolov3.cfg')
     # blob - подготвленное входное изображение для обработки моделью
     blob = cv2.dnn.blobFromImage(image, scale, (288, 288), (0, 0, 0), True, crop=False)
     # помещаем blob в сеть
