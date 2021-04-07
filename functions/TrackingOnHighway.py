@@ -12,6 +12,42 @@ object_detector = cv2.createBackgroundSubtractorMOG2(history=100, varThreshold=4
 
 coords_ID = []
 
+
+def removeBigDiff(mass):
+    if len(mass) < 30:
+        return mass
+    else:
+        i = 0
+        while i < len(mass) - 1:
+            if mass[i] != 0:
+                if abs(mass[i + 1][1][0] - mass[i][1][0]) > 100 and abs(mass[i + 1][1][1] - mass[i][1][1]) > 100:
+                    del mass[i + 1]
+                    i -= 1
+                else:
+                    i += 1
+        return mass
+
+
+def changeArrays(massProof, massLess):
+    # for i in range(len(massProof)):
+    #     for q in massProof[i]:
+    #         x, y = q[1]
+    #         for j in range(len(massLess)):
+    #             for q1 in massLess[j]:
+    #                 x1, y1 = q1[1]
+    #                 if (x - x1) < 30 and (y - y1) < 30:
+    #                     q.append(q1)
+    #                 else:
+    #                     continue
+    for i in massProof:
+        x,y = i[-1][1]
+        for j in massLess:
+            x1,y1 = j[0][1]
+            if x-x1 < 30 and y-y1 < 30:
+                i.append(j)
+
+
+
 while True:
     ret, frame = cap.read()
 
@@ -66,8 +102,6 @@ while True:
     if key == 27:
         break
 
-
-
 # for b in coordsID:
 print(coords_ID)
 #     print("LEN: ")
@@ -75,8 +109,8 @@ print(coords_ID)
 # max_id = coords_ID[0][0][4]
 max_id = 0
 for i in range(len(coords_ID) - 1):
-    if coords_ID[i+1][0][4] > coords_ID[i][0][4]:
-        max_id = coords_ID[i+1][0][4]
+    if coords_ID[i + 1][0][4] > coords_ID[i][0][4]:
+        max_id = coords_ID[i + 1][0][4]
 print(max_id)
 
 print(coords_ID[1][0][4] > coords_ID[0][0][4])
@@ -99,32 +133,36 @@ for i in range(1100, 1700, 1):
 maxCx = 0
 maxCy = 0
 
-
 temp1 = 0
 # создаем массив из траектории конкретного объекта
-for i in range(1, 5, 1):
+massProof = []
+massLess = []
+for i in range(1, 20, 1):
     mass = []
     for ids in tracker.coords_ID:
         if ids[0] == i:
             mass.append(ids)
         else:
             continue
-    print(str(i) + ')')
-    print(mass)
-    # print(mass[0][1][0])
-    # print(mass[0][1][1])
+
+    if len(mass) == 0:
+        continue
+    # print(str(i) + ')')
+    # print(mass)
+    mass = removeBigDiff(mass)
+    # print(mass)
+
     # if mass[0][1][0] in diap1 and mass[0][1][1] in diap1:
     #     if mass[len(mass)-1][1][0] in diap1_1_x and mass[len(mass)-1][1][1] in diap1_1_y:
     #         temp1 += 1
-    print('first x: '+ str(mass[0][1][0]) + ' first y: ' + str(mass[0][1][1]))
-    print('last x: '+ str(mass[len(mass) - 1][1][0]) + ' first y: ' + str(mass[len(mass) - 1][1][1]))
-
-
-
-
-
-
-
+    # print('(' + str(mass[0][1][0]) + ', ' + str(mass[0][1][1]) + ')')
+    # print('(' + str(mass[-1][1][0]) + ', ' + str(mass[-1][1][1]) + ')')
+    if len(mass) > 30:
+        massProof.append(mass)
+    else:
+        massLess.append(mass)
+changeArrays(massProof, massLess)
+print(massProof)
 # for i in mass:
 #     if mass[0][1][0]
 # minCx = mass[0][1][0]
@@ -144,4 +182,3 @@ for i in range(1, 5, 1):
 print("temp1 - " + str(temp1))
 cap.release()
 cv2.destroyAllWindows()
-
