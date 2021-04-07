@@ -113,10 +113,11 @@ for i in range(1, 5, 1):
     print(mass)
     # print(mass[0][1][0])
     # print(mass[0][1][1])
-    if mass[0][1][0] in diap1 and mass[0][1][1] in diap1:
-        if mass[len(mass)-1][1][0] in diap1_1_x and mass[len(mass)-1][1][1] in diap1_1_y:
-            temp1 += 1
-
+    # if mass[0][1][0] in diap1 and mass[0][1][1] in diap1:
+    #     if mass[len(mass)-1][1][0] in diap1_1_x and mass[len(mass)-1][1][1] in diap1_1_y:
+    #         temp1 += 1
+    print('first x: '+ str(mass[0][1][0]) + ' first y: ' + str(mass[0][1][1]))
+    print('last x: '+ str(mass[len(mass) - 1][1][0]) + ' first y: ' + str(mass[len(mass) - 1][1][1]))
 
 
 
