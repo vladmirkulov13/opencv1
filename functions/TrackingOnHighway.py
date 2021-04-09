@@ -4,7 +4,7 @@ from Detection import *
 # Create tracker object
 tracker = EuclideanDistTracker()
 
-cap = cv2.VideoCapture("../videos/highway.mp4")
+cap = cv2.VideoCapture("../videos/perekrestok_Trim.mp4")
 
 # Object detection from Stable camera
 # маска на основе гаусса
@@ -22,29 +22,29 @@ def removeBigDiff(mass):
             if mass[i] != 0:
                 if abs(mass[i + 1][1][0] - mass[i][1][0]) > 100 and abs(mass[i + 1][1][1] - mass[i][1][1]) > 100:
                     del mass[i + 1]
-                    i -= 1
+
                 else:
                     i += 1
         return mass
 
 
-def changeArrays(massProof, massLess):
-    # for i in range(len(massProof)):
-    #     for q in massProof[i]:
-    #         x, y = q[1]
-    #         for j in range(len(massLess)):
-    #             for q1 in massLess[j]:
-    #                 x1, y1 = q1[1]
-    #                 if (x - x1) < 30 and (y - y1) < 30:
-    #                     q.append(q1)
-    #                 else:
-    #                     continue
-    for i in massProof:
-        x,y = i[-1][1]
-        for j in massLess:
-            x1,y1 = j[0][1]
-            if x-x1 < 30 and y-y1 < 30:
-                i.append(j)
+def changeArray(masses):
+    i = 0
+    while i < len(masses):
+        x = masses[i][-1][1][0]
+        y = masses[i][-1][1][1]
+        j = i + 1
+        while j < len(masses):
+            x_n = masses[j][0][1][0]
+            y_n = masses[j][0][1][1]
+            if abs(x_n - x) < 20 and abs(y_n - y) < 20:
+                for q in masses[j]:
+                    masses[i].append(q)
+                del masses[j]
+            else :
+                j += 1
+
+        i += 1
 
 
 
@@ -72,7 +72,7 @@ while True:
     for cnt in contours:
         # Calculate area and remove small elements
         area = cv2.contourArea(cnt)
-        if area > 7000:
+        if area > 500:
             # cv2.drawContours(roi1, [cnt], -1, (0, 255, 0), 2)
             # ограничение прямоугольника
             x, y, w, h = cv2.boundingRect(cnt)
@@ -135,9 +135,8 @@ maxCy = 0
 
 temp1 = 0
 # создаем массив из траектории конкретного объекта
-massProof = []
-massLess = []
-for i in range(1, 20, 1):
+masses = []
+for i in range(0, 100, 1):
     mass = []
     for ids in tracker.coords_ID:
         if ids[0] == i:
@@ -150,6 +149,7 @@ for i in range(1, 20, 1):
     # print(str(i) + ')')
     # print(mass)
     mass = removeBigDiff(mass)
+    masses.append(mass)
     # print(mass)
 
     # if mass[0][1][0] in diap1 and mass[0][1][1] in diap1:
@@ -157,12 +157,12 @@ for i in range(1, 20, 1):
     #         temp1 += 1
     # print('(' + str(mass[0][1][0]) + ', ' + str(mass[0][1][1]) + ')')
     # print('(' + str(mass[-1][1][0]) + ', ' + str(mass[-1][1][1]) + ')')
-    if len(mass) > 30:
-        massProof.append(mass)
-    else:
-        massLess.append(mass)
-changeArrays(massProof, massLess)
-print(massProof)
+    # if len(mass) > 30:
+    #     massProof.append(mass)
+    # else:
+    #     massLess.append(mass)
+# changeArrays(massProof, massLess)
+# print(mass)
 # for i in mass:
 #     if mass[0][1][0]
 # minCx = mass[0][1][0]
@@ -179,6 +179,20 @@ print(massProof)
 # print(mass)
 # print(minCx, minCy)
 # print(maxCx, maxCy)
+# i = 0
+# while i < len(masses):
+#     x_0 = masses[i][0][1][0]
+#     y_0 = masses[i][0][1][1]
+#     x_n = masses[i][-1][1][0]
+#     y_n = masses[i][-1][1][1]
+#     dif_x = x_n - x_0
+#     dif_y = y_n - y_0
+#     if dif_x < 80 and dif_y < 80:
+#         del masses[i]
+#     else:
+#         i += 1
+changeArray(masses)
+
 print("temp1 - " + str(temp1))
 cap.release()
 cv2.destroyAllWindows()
