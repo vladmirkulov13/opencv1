@@ -4,7 +4,7 @@ from Detection import *
 # Create tracker object
 tracker = EuclideanDistTracker()
 
-cap = cv2.VideoCapture("../videos/Crossroads Traffic Light_Trim.mp4")
+cap = cv2.VideoCapture("../videos/highway.mp4")
 
 # Object detection from Stable camera
 # маска на основе гаусса
