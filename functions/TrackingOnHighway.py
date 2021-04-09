@@ -31,21 +31,29 @@ def removeBigDiff(mass):
 def changeArray(masses):
     i = 0
     while i < len(masses):
-        x = masses[i][-1][1][0]
-        y = masses[i][-1][1][1]
         j = i + 1
         while j < len(masses):
+            x = masses[i][-1][1][0]
+            y = masses[i][-1][1][1]
             x_n = masses[j][0][1][0]
             y_n = masses[j][0][1][1]
-            if abs(x_n - x) < 20 and abs(y_n - y) < 20:
+            if abs(x_n - x) < 40 and abs(y_n - y) < 40:
                 for q in masses[j]:
                     masses[i].append(q)
                 del masses[j]
-            else :
+            else:
                 j += 1
 
         i += 1
 
+
+def indexingArray(masses):
+    id_count = 1
+    for i in masses:
+        i[0][0] = id_count
+        for j in range(len(i)):
+            i[j][0] = id_count
+        id_count += 1
 
 
 while True:
@@ -72,7 +80,7 @@ while True:
     for cnt in contours:
         # Calculate area and remove small elements
         area = cv2.contourArea(cnt)
-        if area > 500:
+        if area > 200:
             # cv2.drawContours(roi1, [cnt], -1, (0, 255, 0), 2)
             # ограничение прямоугольника
             x, y, w, h = cv2.boundingRect(cnt)
@@ -88,8 +96,8 @@ while True:
     coords_ID.append(boxes_ids)
     for box_id in boxes_ids:
         x, y, w, h, id = box_id
-        cv2.putText(frame, str(id), (x, y - 15), cv2.FONT_HERSHEY_PLAIN, 2, (255, 0, 0), 2)
-        cv2.rectangle(frame, (x, y), (x + w, y + h), (0, 255, 0), 3)
+        # cv2.putText(frame, str(id), (x, y - 15), cv2.FONT_HERSHEY_PLAIN, 2, (255, 0, 0), 2)
+        # cv2.rectangle(frame, (x, y), (x + w, y + h), (0, 255, 0), 3)
 
     # cv2.imshow("roi1", roi1)
     cv2.imshow("Frame", frame)
@@ -118,25 +126,9 @@ print(coords_ID[1][0][4] > coords_ID[0][0][4])
 print(tracker.coords_ID)
 print("------------------------------")
 
-diap1 = []
-for i in range(100, 500, 1):
-    diap1.append(i)
-
-diap1_1_x = []
-for i in range(600, 1000, 1):
-    diap1_1_x.append(i)
-
-diap1_1_y = []
-for i in range(1100, 1700, 1):
-    diap1_1_y.append(i)
-
-maxCx = 0
-maxCy = 0
-
-temp1 = 0
 # создаем массив из траектории конкретного объекта
 masses = []
-for i in range(0, 100, 1):
+for i in range(0, 200, 1):
     mass = []
     for ids in tracker.coords_ID:
         if ids[0] == i:
@@ -192,7 +184,47 @@ for i in range(0, 100, 1):
 #     else:
 #         i += 1
 changeArray(masses)
+# indexingArray(masses)
 
-print("temp1 - " + str(temp1))
+# въезд откуда угодно
+# выезд в диапазоны
+diap_L_R_x = [i for i in range(450, 900, 1)]
+diap_L_R_y = [i for i in range(380, 700, 1)]
+diap_L_S_x = [i for i in range(600, 900, 1)]
+diap_L_S_y = [i for i in range(300)]
+# диапазоны въездов справа
+diap_R_input_x = [i for i in range(400, 850, 1)]
+diap_R_input_y = [i for i in range(200)]
+# диапазоны выезда справа направо
+diap_R_R_x = [i for i in range(150, 500, 1)]
+diap_R_R_y = [i for i in range(150)]
+diap_R_S_x = [i for i in range(200)]
+diap_R_S_y = [i for i in range(200, 500, 1)]
+
+fromL_Turn_R = 0
+fromL_Keep_S = 0
+fromR_Turn_R = 0
+fromR_Keep_S = 0
+for i in masses:
+    if i[-1][1][0] in diap_L_R_x and i[-1][1][1] in diap_L_R_y:
+        fromL_Turn_R += 1
+        continue
+    if i[-1][1][0] in diap_L_S_x and i[-1][1][1] in diap_L_S_y:
+        fromL_Keep_S += 1
+        continue
+    if (i[0][1][0] in diap_R_input_x and i[0][1][1] in diap_R_input_y):
+        if (i[-1][1][0] in diap_R_R_x) and (i[-1][1][1] in diap_R_R_y):
+            fromR_Turn_R += 1
+            continue
+        if (i[-1][1][0] in diap_R_S_x) and (i[-1][1][1] in diap_R_S_y):
+            fromR_Keep_S += 1
+            continue
+    else:
+        continue
+print("Слева повернуло направо(2): " +  str(fromL_Turn_R))
+print("Слева поехало прямо(11): " + str(fromL_Keep_S))
+print("Справа повернуло направо(4): " + str(fromR_Turn_R))
+print("Cправа поехало прямо(7): " + str(fromR_Keep_S))
+
 cap.release()
 cv2.destroyAllWindows()
