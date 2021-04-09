@@ -25,6 +25,8 @@ class EuclideanDistTracker:
             cx = (x + x + w) // 2
             cy = (y + y + h) // 2
 
+            # self.coords_ID.append([self.id_count, (cx, cy)])
+
             # Find out if that object was detected already
             same_object_detected = False
             # идем по словарю центров прямоугольников
@@ -35,7 +37,7 @@ class EuclideanDistTracker:
                 dist = math.hypot(cx - pt[0], cy - pt[1])
                 # если сравнение точек дало < 100
                 # значит объект тот же самый
-                if dist < 500:
+                if dist < 25:
                     # перезаписываем в словаре значение для данного прямоугольника
                     self.center_points[id] = (cx, cy)
                     temp = [id, (cx, cy)]
@@ -55,6 +57,9 @@ class EuclideanDistTracker:
                 self.center_points[self.id_count] = (cx, cy)
 
                 objects_bbs_ids.append([x, y, w, h, self.id_count])
+                cx = (x + x + w) // 2
+                cy = (y + y + h) // 2
+                self.coords_ID.append([self.id_count, (cx, cy)])
                 self.id_count += 1
 
         # Clean the dictionary by center points to remove IDS not used anymore
