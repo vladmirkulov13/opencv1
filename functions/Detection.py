@@ -4,12 +4,13 @@ import numpy as np
 
 def draw_prediction(img, class_id, confidence, x, y, x_plus_w, y_plus_h):
     label = str(classes[class_id]) + ' Conf: ' + str(round(confidence * 100, 3))
-    # label = str(classes[class_id])
     color = COLORS[class_id]
 
     cv2.rectangle(img, (x, y), (x_plus_w, y_plus_h), color, 2)
 
     cv2.putText(img, label, (x - 10, y - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, color, 2)
+
+
 
 
 def get_output_layers(net):
@@ -87,13 +88,14 @@ def classify(image):
         h = box[3]
         draw_prediction(image, class_ids[i], confidences[i], round(x), round(y), round(x + w), round(y + h))
         types_on_image.append(classes[class_ids[i]])
+
     cv2.imshow("Image", image)
     cv2.waitKey(0)
     return types_on_image
 
 
-# image = cv2.imread("../photos/cars&truck&bus.jpg")
-# types = classify(image)
+image = cv2.imread("../photos/cars&truck&bus.jpg")
+types = classify(image)
 
 # for i in types:
 #     print(i)

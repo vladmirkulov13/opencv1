@@ -1,5 +1,5 @@
 from tracker import *
-from Detection import *
+import cv2
 
 # Create tracker object
 tracker = EuclideanDistTracker()
@@ -9,6 +9,7 @@ cap = cv2.VideoCapture("../videos/perekrestok_Trim.mp4")
 # Object detection from Stable camera
 # маска на основе гаусса
 object_detector = cv2.createBackgroundSubtractorMOG2(history=100, varThreshold=40)
+
 
 coords_ID = []
 
@@ -96,8 +97,10 @@ while True:
     coords_ID.append(boxes_ids)
     for box_id in boxes_ids:
         x, y, w, h, id = box_id
-        # cv2.putText(frame, str(id), (x, y - 15), cv2.FONT_HERSHEY_PLAIN, 2, (255, 0, 0), 2)
-        # cv2.rectangle(frame, (x, y), (x + w, y + h), (0, 255, 0), 3)
+        cv2.putText(frame, str(id), (x, y - 15), cv2.FONT_HERSHEY_PLAIN, 2, (255, 0, 0), 2)
+        cv2.rectangle(frame, (x, y), (x + w, y + h), (0, 255, 0), 3)
+        # image = frame[y:y+h, x:x+w]
+        # cv2.imwrite('image' + str(id) + '.jpg', image)
 
     # cv2.imshow("roi1", roi1)
     cv2.imshow("Frame", frame)
