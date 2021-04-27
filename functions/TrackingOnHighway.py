@@ -4,6 +4,7 @@ import cv2
 # Create tracker object
 tracker = EuclideanDistTracker()
 
+# cap = cv2.VideoCapture("../videos/Road traffic video for object recognition.mp4")
 cap = cv2.VideoCapture("../videos/perekrestok_Trim.mp4")
 
 # Object detection from Stable camera

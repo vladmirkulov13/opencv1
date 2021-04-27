@@ -2,12 +2,6 @@ import cv2
 import numpy as np
 
 
-class Car:
-    def __init__(self, coords, count):
-        self.coords = coords
-        self.count = count
-
-
 def draw_prediction(img, class_id, confidence, x, y, x_plus_w, y_plus_h):
     label = str(classes[class_id]) + ' Conf: ' + str(round(confidence * 100, 3))
     color = COLORS[class_id]
@@ -31,10 +25,12 @@ with open('../yoloModel/yolov3.txt', 'r') as f:
 COLORS = np.random.uniform(0, 255, size=(len(classes), 3))
 types_on_image = []
 
-
-def classify(image):
-    Width = image.shape[1]
-    Height = image.shape[0]
+cap = cv2.VideoCapture("../videos/Road traffic video for object recognition.mp4")
+count = 0
+while True:
+    ret, frame = cap.read()
+    Width = frame.shape[1]
+    Height = frame.shape[0]
     scale = 0.00392
 
     # чтение классов из файла и запись в массив (простой список) classes
@@ -42,8 +38,9 @@ def classify(image):
     # считываются файлы весов и конфигурации, создается сеть
     # на основе обученной модели yolo3
     net = cv2.dnn.readNet('../yoloModel/yolov3.weights', '../yoloModel/yolov3.cfg')
+
     # blob - подготвленное входное изображение для обработки моделью
-    blob = cv2.dnn.blobFromImage(image, scale, (288, 288), (0, 0, 0), True, crop=False)
+    blob = cv2.dnn.blobFromImage(frame, scale, (288, 288), (0, 0, 0), True, crop=False)
     # помещаем blob в сеть
     net.setInput(blob)
     # запускаем логический вывод по сети
@@ -53,7 +50,6 @@ def classify(image):
     class_ids = []
     confidences = []
     boxes = []
-    count = 0
     conf_threshold = 0.8
     nms_threshold = 0.4
 
@@ -83,35 +79,27 @@ def classify(image):
                 boxes.append([x, y, w, h])
     # подавление немаксимумов
     indices = cv2.dnn.NMSBoxes(boxes, confidences, conf_threshold, nms_threshold)
-    cars = []
     # отрисовка прямоугольников с учетом подавления немаксимальных
     for i in indices:
-        coords = []
         i = i[0]
         box = boxes[i]
         x = box[0]
         y = box[1]
         w = box[2]
         h = box[3]
-        types_on_image.append(classes[class_ids[i]])
-        coords.append(round(x))
-        coords.append(round(y))
-        coords.append(round(x + w))
-        coords.append(round(y + h))
-        img = image[coords[1]: coords[3], coords[0]:coords[2]]
-        cv2.imwrite("car" + str(count) + ".jpg", img)
-        car = Car(coords, count)
-        cars.append(car)
-        draw_prediction(image, class_ids[i], confidences[i], round(x), round(y), round(x + w), round(y + h))
-        count += 1
 
-    cv2.imshow("Image", image)
-    cv2.waitKey(0)
-    return types_on_image, cars
+        types_on_image.append(classes[class_ids[i]])
+        x, y, w, h = round(x), round(y), round(w), round(h)
+        image = frame[y:y + h, x:x + w]
+        draw_prediction(frame, class_ids[i], confidences[i], x, y, x + w, y + h)
+
+    cv2.imwrite("first_frame.jpg", image)
+
+    cv2.imshow("Frame", frame)
+    count += 60
+    cap.set(1, count)
+    if cv2.waitKey(30) == 27:
+        break
 
 # image = cv2.imread("../photos/cars&truck&bus.jpg")
 # types = classify(image)
-
-# for i in types:
-#     print(i)
-# print(len(types))
