@@ -71,7 +71,7 @@ def classify(image):
             confidence = scores[class_id]
             # если уверенность в объекте > 0.5
             # то извлекаются координаты его расположения
-            if confidence > 0.8 and class_id in may_classes:
+            if confidence > 0.2: #and class_id in may_classes:
                 center_x = int(detection[0] * Width)
                 center_y = int(detection[1] * Height)
                 w = int(detection[2] * Width)
@@ -109,8 +109,9 @@ def classify(image):
     cv2.waitKey(0)
     return types_on_image, cars
 
-# image = cv2.imread("../photos/cars&truck&bus.jpg")
-# types = classify(image)
+image = cv2.imread("../photos/cars&truck&bus.jpg")
+types = classify(image)
+
 
 # for i in types:
 #     print(i)

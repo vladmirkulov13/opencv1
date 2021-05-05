@@ -116,10 +116,10 @@ config_file = "../yoloModel/ssd_mobilenet_v3_large_coco_2020_01_14.pbtxt"
 frozen_model = "../yoloModel/frozen_inference_graph.pb"
 
 model = cv2.dnn_DetectionModel(frozen_model, config_file)
-model = cv2.dnn_D
+
 
 classLabels = []
-file = "../yoloModel/Labels"
+file = "../yoloModel/Labes"
 with open(file, 'rt') as fpt:
     classLabels = fpt.read().rstrip('\n').split('\n')
 

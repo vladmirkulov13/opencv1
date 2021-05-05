@@ -108,7 +108,7 @@ for i in range(len(mass)):
         maxCx = mass[i][1][0]
         maxCy = mass[i][1][1]
 
-cv2.line()
+
 
 
 print(countOfID)
