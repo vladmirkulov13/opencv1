@@ -141,7 +141,7 @@ scale = 0.00392
 
 classes = None
 # чтение классов из файла и запись в массив (простой список) classes
-with open('../yolov3.txt', 'r') as f:
+with open('../yoloModel/yolov3.txt', 'r') as f:
     classes = [line.strip() for line in f.readlines()]
 
 COLORS = np.random.uniform(0, 255, size=(len(classes), 3))
