@@ -1,10 +1,9 @@
 from tracker import *
-import cv2
+from Detection import *
 
 # Create tracker object
 tracker = EuclideanDistTracker()
 
-# cap = cv2.VideoCapture("../videos/Road traffic video for object recognition.mp4")
 cap = cv2.VideoCapture("../videos/perekrestok_Trim.mp4")
 
 # Object detection from Stable camera
@@ -12,7 +11,6 @@ cap = cv2.VideoCapture("../videos/perekrestok_Trim.mp4")
 object_detector = cv2.createBackgroundSubtractorMOG2(history=100, varThreshold=40)
 
 coords_ID = []
-WIDTH, HEIGHT = 0, 0
 
 
 def removeBigDiff(mass):
@@ -39,7 +37,7 @@ def changeArray(masses):
             y = masses[i][-1][1][1]
             x_n = masses[j][0][1][0]
             y_n = masses[j][0][1][1]
-            if abs(x_n - x) < 30 and abs(y_n - y) < 30:
+            if abs(x_n - x) < 40 and abs(y_n - y) < 40:
                 for q in masses[j]:
                     masses[i].append(q)
                 del masses[j]
@@ -65,9 +63,6 @@ while True:
         break
 
     height, width, _ = frame.shape
-    WIDTH = width
-    HEIGHT = height
-    frame = frame[:WIDTH-320, :]
     # Extract Region of interest
     # roi = frame[int(height / 4): int(3 / 4 * height), int(width / 4):int(3 / 4 * width)]
     roi1 = frame[0:400, 0:400]
@@ -102,9 +97,7 @@ while True:
     for box_id in boxes_ids:
         x, y, w, h, id = box_id
         # cv2.putText(frame, str(id), (x, y - 15), cv2.FONT_HERSHEY_PLAIN, 2, (255, 0, 0), 2)
-        cv2.rectangle(frame, (x, y), (x + w, y + h), (0, 255, 0), 3)
-        # image = frame[y:y+h, x:x+w]
-        # cv2.imwrite('image' + str(id) + '.jpg', image)
+        # cv2.rectangle(frame, (x, y), (x + w, y + h), (0, 255, 0), 3)
 
     # cv2.imshow("roi1", roi1)
     cv2.imshow("Frame", frame)
@@ -119,10 +112,14 @@ while True:
 
 # for b in coordsID:
 print(coords_ID)
-
+#     print("LEN: ")
+#     print(len(b))
+# max_id = coords_ID[0][0][4]
 max_id = 0
-
-
+for i in range(len(coords_ID) - 1):
+    if coords_ID[i + 1][0][4] > coords_ID[i][0][4]:
+        max_id = coords_ID[i + 1][0][4]
+print(max_id)
 
 print(coords_ID[1][0][4] > coords_ID[0][0][4])
 
@@ -145,28 +142,62 @@ for i in range(0, 200, 1):
     # print(mass)
     mass = removeBigDiff(mass)
     masses.append(mass)
+    # print(mass)
 
+    # if mass[0][1][0] in diap1 and mass[0][1][1] in diap1:
+    #     if mass[len(mass)-1][1][0] in diap1_1_x and mass[len(mass)-1][1][1] in diap1_1_y:
+    #         temp1 += 1
+    # print('(' + str(mass[0][1][0]) + ', ' + str(mass[0][1][1]) + ')')
+    # print('(' + str(mass[-1][1][0]) + ', ' + str(mass[-1][1][1]) + ')')
+    # if len(mass) > 30:
+    #     massProof.append(mass)
+    # else:
+    #     massLess.append(mass)
+# changeArrays(massProof, massLess)
+# print(mass)
+# for i in mass:
+#     if mass[0][1][0]
+# minCx = mass[0][1][0]
+# minCy = mass[0][1][1]
+# находим наименьшие и наибольшие координаты
+# for i in range(len(mass)):
+#     if mass[i][1][0] < minCx:
+#         minCx = mass[i][1][0]
+#         minCy = mass[i][1][1]
+#     if mass[i][1][0] > maxCx:
+#         maxCx = mass[i][1][0]
+#         maxCy = mass[i][1][1]
+#
+# print(mass)
+# print(minCx, minCy)
+# print(maxCx, maxCy)
+# i = 0
+# while i < len(masses):
+#     x_0 = masses[i][0][1][0]
+#     y_0 = masses[i][0][1][1]
+#     x_n = masses[i][-1][1][0]
+#     y_n = masses[i][-1][1][1]
+#     dif_x = x_n - x_0
+#     dif_y = y_n - y_0
+#     if dif_x < 80 and dif_y < 80:
+#         del masses[i]
+#     else:
+#         i += 1
 changeArray(masses)
-indexingArray(masses)
+# indexingArray(masses)
 
-
-# диапазоны въезда слева
-# 400:600 , 100:400
-diap_L_input_x = [i for i in range(100, 400, 1)]
-diap_L_input_y = [i for i in range(400, 600, 1)]
-# диапазоны лево-право
+# въезд откуда угодно
+# выезд в диапазоны
 diap_L_R_x = [i for i in range(450, 900, 1)]
 diap_L_R_y = [i for i in range(380, 700, 1)]
-# диапазоны лево-прямо
 diap_L_S_x = [i for i in range(600, 900, 1)]
 diap_L_S_y = [i for i in range(300)]
-# диапазоны въезда справа
+# диапазоны въездов справа
 diap_R_input_x = [i for i in range(400, 850, 1)]
 diap_R_input_y = [i for i in range(200)]
-# диапазоны право-право
+# диапазоны выезда справа направо
 diap_R_R_x = [i for i in range(150, 500, 1)]
 diap_R_R_y = [i for i in range(150)]
-# диапазоны право-прямо
 diap_R_S_x = [i for i in range(200)]
 diap_R_S_y = [i for i in range(200, 500, 1)]
 
@@ -175,20 +206,13 @@ fromL_Keep_S = 0
 fromR_Turn_R = 0
 fromR_Keep_S = 0
 for i in masses:
-
-    fx = int(i[0][1][0])
-    fy = int(i[0][1][1])
-    sy = int(i[len(i) - 1][1][1])
-    sx = int(i[len(i) - 1][1][0])
-    cv2.line(frame, (fx, fy), (sx, sy), (255, 255, 255))
-    if (i[0][1][0] in diap_L_input_x) and (i[0][1][1] in diap_L_input_y):
-        if (i[-1][1][0] in diap_L_R_x) and (i[-1][1][1] in diap_L_R_y):
-            fromL_Turn_R += 1
-            continue
-        if (i[-1][1][0] in diap_L_S_x) and (i[-1][1][1] in diap_L_S_y):
-            fromL_Keep_S += 1
-            continue
-    if (i[0][1][0] in diap_R_input_x) and (i[0][1][1] in diap_R_input_y):
+    if i[-1][1][0] in diap_L_R_x and i[-1][1][1] in diap_L_R_y:
+        fromL_Turn_R += 1
+        continue
+    if i[-1][1][0] in diap_L_S_x and i[-1][1][1] in diap_L_S_y:
+        fromL_Keep_S += 1
+        continue
+    if (i[0][1][0] in diap_R_input_x and i[0][1][1] in diap_R_input_y):
         if (i[-1][1][0] in diap_R_R_x) and (i[-1][1][1] in diap_R_R_y):
             fromR_Turn_R += 1
             continue
@@ -197,16 +221,10 @@ for i in masses:
             continue
     else:
         continue
-cv2.putText(frame, "Turn right: " + str(fromL_Turn_R), (100, 600), cv2.FONT_HERSHEY_PLAIN, 2, (255, 255, 255), 2)
-cv2.putText(frame, "Straight: " + str(fromL_Keep_S), (100, 630), cv2.FONT_HERSHEY_PLAIN, 2, (255, 255, 255), 2)
-cv2.putText(frame, "Turn right: " + str(fromR_Turn_R), (WIDTH - 250, 250), cv2.FONT_HERSHEY_PLAIN, 2, (255, 255, 255), 2)
-cv2.putText(frame, "Straight: " + str(fromR_Keep_S), (WIDTH - 250, 280), cv2.FONT_HERSHEY_PLAIN, 2, (255, 255, 255), 2)
-cv2.imshow("frame", frame)
-cv2.waitKey(0)
-print("Слева повернуло направо(2): " + str(fromL_Turn_R))
-print("Слева поехало прямо(8): " + str(fromL_Keep_S))
-print("Справа повернуло направо(3): " + str(fromR_Turn_R))
-print("Cправа поехало прямо(6): " + str(fromR_Keep_S))
-qwerty = 10
+print("Слева повернуло направо(2): " +  str(fromL_Turn_R))
+print("Слева поехало прямо(11): " + str(fromL_Keep_S))
+print("Справа повернуло направо(4): " + str(fromR_Turn_R))
+print("Cправа поехало прямо(7): " + str(fromR_Keep_S))
+
 cap.release()
 cv2.destroyAllWindows()
