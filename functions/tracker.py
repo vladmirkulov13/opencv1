@@ -40,10 +40,10 @@ class EuclideanDistTracker:
                 if dist < 25:
                     # перезаписываем в словаре значение для данного прямоугольника
                     self.center_points[id] = (cx, cy)
-                    temp = [id, (cx, cy)]
-                    self.coords_ID.append(temp)
+                    # temp = [id, (cx, cy)]
+                    # self.coords_ID.append(temp)
                     # вывод номера объекта + координаты
-                    print(self.center_points)
+                    # print(self.center_points)
                     # self.center_points_last[self.id_count].append(self.center_points.items())
                     # self.center_points_last.update(self.center_points)
                     # добавляем координаты и номер прямоугольника в objects_bbs_ids
@@ -57,9 +57,9 @@ class EuclideanDistTracker:
                 self.center_points[self.id_count] = (cx, cy)
 
                 objects_bbs_ids.append([x, y, w, h, self.id_count])
-                cx = (x + x + w) // 2
-                cy = (y + y + h) // 2
-                self.coords_ID.append([self.id_count, (cx, cy)])
+                # cx = (x + x + w) // 2
+                # cy = (y + y + h) // 2
+                # self.coords_ID.append([self.id_count, (cx, cy)])
                 self.id_count += 1
 
         # Clean the dictionary by center points to remove IDS not used anymore

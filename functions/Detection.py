@@ -1,3 +1,5 @@
+import math
+
 import cv2
 import numpy as np
 
@@ -33,27 +35,34 @@ def get_output_layers(net):
     return output_layers
 
 
+def get_key(d, value):
+    for k, v in d.items():
+        if v == value:
+            return k
+
+
 may_classes = {1, 2, 3, 5, 7}
 with open('../yoloModel/yolov3.txt', 'r') as f:
     classes = [line.strip() for line in f.readlines()]
 COLORS = np.random.uniform(0, 255, size=(len(classes), 3))
 
 net = cv2.dnn.readNet('../yoloModel/yolov3.weights', '../yoloModel/yolov3.cfg')
+dict = {}
 
 
-def classify(image):
+def classify(frame):
     types_on_image = []
-    Width = image.shape[1]
-    Height = image.shape[0]
+    Width = frame.shape[1]
+    Height = frame.shape[0]
     scale = 0.00392
-
+    id = 0
     # чтение классов из файла и запись в массив (простой список) classes
     start = time.time()
     # считываются файлы весов и конфигурации, создается сеть
     # на основе обученной модели yolo3
 
     # blob - подготвленное входное изображение для обработки моделью
-    blob = cv2.dnn.blobFromImage(image, scale, (288, 288), (0, 0, 0), True, crop=False)
+    blob = cv2.dnn.blobFromImage(frame, scale, (288, 288), (0, 0, 0), True, crop=False)
     # помещаем blob в сеть
     net.setInput(blob)
     # запускаем логический вывод по сети
@@ -72,7 +81,7 @@ def classify(image):
 
     # для каждого обнаружения из каждого выходного слоя
     # получить достоверность, идентификатор класса, параметры ограничивающей рамки
-    # и игнорировать слабые обнаружения (достоверность <0,5)
+    # и игнорировать слабые обнаружения (достоверность < 0,5)
     for out in outs:
         for detection in out:
             # первые пять элементов - это координаты объекта - х, у, ширина, выотса
@@ -98,13 +107,32 @@ def classify(image):
     indices = cv2.dnn.NMSBoxes(boxes, confidences, conf_threshold, nms_threshold)
     # отрисовка прямоугольников с учетом подавления немаксимальных
     for i in indices:
+        sameObject = False
+        now_id = 0
         i = i[0]
         box = boxes[i]
         x = box[0]
         y = box[1]
         w = box[2]
         h = box[3]
-        draw_prediction(image, class_ids[i], confidences[i], round(x), round(y), round(x + w), round(y + h))
+        draw_prediction(frame, class_ids[i], confidences[i], round(x), round(y), round(x + w), round(y + h))
+        x, y, w, h = int(x), int(y), int(w), int(h)
+        cx = (x + x + w) // 2
+        cy = (y + y + h) // 2
+        if count == 0:
+            id += 1
+            dict[id] = (cx, cy)
+        else:
+            for centers in dict.values():
+                now_id += 1
+                if math.hypot(cx - centers[0], cy - centers[1]) < 50:
+                    sameObject = True
+                    dict[now_id] = (cx, cy)
+                    break
+            if not sameObject:
+                dict[len(dict) + 1] = (cx, cy)
+
+
         if class_ids[i] == 2:
             fullCarConf += confidences[i]
             carCount += 1
@@ -112,7 +140,7 @@ def classify(image):
             fullTruckConf += confidences[i]
             truckCount += 1
         types_on_image.append(classes[class_ids[i]])
-        # cv2.putText(img, label, (x - 10, y - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, color, 2)
+
     if carCount != 0:
         avgCarConf = fullCarConf / carCount
     else:
@@ -121,19 +149,32 @@ def classify(image):
         avgTruckConf = fullTruckConf / truckCount
     else:
         avgTruckConf = 0
-    # cv2.putText(image, "All types: " + str(carCount + truckCount), (100, 60), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 0), 2)
-    # cv2.putText(image, "Car: " + str(carCount), (100, 80), cv2.FONT_HERSHEY_SIMPLEX, 0.5,(0, 0, 0), 2)
-    # cv2.putText(image, "Avg conf: " + str(round(avgCarConf, 2) * 100) + "%", (100, 100), cv2.FONT_HERSHEY_SIMPLEX, 0.5,
-    #             (0, 0, 0), 2)
-    # cv2.putText(image, "Truck: " + str(truckCount), (100, 120), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2)
-    # cv2.putText(image, "Avg conf: " + str(round(avgTruckConf, 2) * 100) + "%", (100, 140), cv2.FONT_HERSHEY_SIMPLEX,
-    #             0.5, (0, 255, 0), 2)
-    # cv2.putText(image, "Time: " + str(round(stop - start, 2)), (100, 160), cv2.FONT_HERSHEY_SIMPLEX, 0.5,
-    #             (255, 255, 255), 2)
-    # cv2.imshow("Car Detecting", image)
-    # cv2.waitKey(0)
+    cv2.putText(frame, "All types: " + str(carCount + truckCount), (100, 60), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 0),
+                2)
+    cv2.putText(frame, "Car: " + str(carCount), (100, 80), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 0), 2)
+    cv2.putText(frame, "Avg conf: " + str(round(avgCarConf, 2) * 100) + "%", (100, 100), cv2.FONT_HERSHEY_SIMPLEX, 0.5,
+                (0, 0, 0), 2)
+    cv2.putText(frame, "Truck: " + str(truckCount), (100, 120), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2)
+    cv2.putText(frame, "Avg conf: " + str(round(avgTruckConf, 2) * 100) + "%", (100, 140), cv2.FONT_HERSHEY_SIMPLEX,
+                0.5, (0, 255, 0), 2)
+    cv2.putText(frame, "Time: " + str(round(stop - start, 2)), (100, 160), cv2.FONT_HERSHEY_SIMPLEX, 0.5,
+                (255, 255, 255), 2)
+    number = 0
+    for d in dict.values():
+        number += 1
+        cv2.putText(frame, str(number), (d[0], d[1]), cv2.FONT_HERSHEY_SIMPLEX, 0.5,
+                    (255, 255, 255), 2)
+    cv2.imshow("Car Detecting", frame)
+    cv2.waitKey(0)
     return types_on_image
 
 
-# image = cv2.imread("../photos/videt-mnogo-mashin-na-doroge-vo-sne.jpg")
-# types = classify(image)
+cap = cv2.VideoCapture("../videos/4k.mp4")
+count = 0
+ret, frame = cap.read()
+types = classify(frame)
+count = 1
+while True:
+    ret, frame = cap.read()
+    types = classify(frame)
+print(4)
